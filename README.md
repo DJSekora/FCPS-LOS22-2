@@ -10,5 +10,11 @@ https://www.quantamagazine.org/mathematicians-discover-the-perfect-way-to-multip
 Computer Memory:
 https://en.wikipedia.org/wiki/MOSFET
 
+A Historical Chatbot:
+http://psych.fullerton.edu/mbirnbaum/psych101/Eliza.htm
+
+Random Numbers:
+https://www.random.org/randomness/
+
 ## Search Terms of Interest
 Nothing here yet!
