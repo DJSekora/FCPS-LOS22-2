@@ -16,5 +16,8 @@ http://psych.fullerton.edu/mbirnbaum/psych101/Eliza.htm
 Random Numbers:
 https://www.random.org/randomness/
 
+Computers in Mathematical Proofs (Four Color Theorem):
+https://www.cantorsparadise.com/the-four-color-theorem-8eece6ab6b12
+
 ## Search Terms of Interest
 Nothing here yet!
