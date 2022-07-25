@@ -16,7 +16,7 @@ public class PersonTest
     // Every Java file you create defines a type of object!
     PersonTest what = new PersonTest();
     
-    // This creates an infinite loop
-    //what.main(new String[0]);
+    // Calling an instance method
+    bob.sayHi();
   }
 }

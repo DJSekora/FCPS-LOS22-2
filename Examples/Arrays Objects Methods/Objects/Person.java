@@ -26,4 +26,19 @@ public class Person
     name = n;
     age = a;
   }
+  
+  /* Instance (non-static) method example
+     To call this method, we need a variable of type Person
+     Example:
+        bob.sayHi();
+      instead of 
+        sayHi();
+        
+     In exchange, we are able to access all of the instance variables (fields)
+     of that object. For example, here we get to use 'name' and 'age'.
+   */
+  public void sayHi()
+  {
+    System.out.println("Hi, I'm " + name + " and I'm " + age + " years old!");
+  }
 }
