@@ -5,6 +5,21 @@ public class SortsExample
   public static void main(String[] args)
   {
     int[] list = new int[]{6,2,8,43,87,-23,37, 20};
+    
+    long start = System.currentTimeMillis();
+    slowBubbleSort(list);
+    long end = System.currentTimeMillis();
+    System.out.println(end - start);
+  }
+  
+  // Utility method to print an array
+  public static void printArray(int[] banana)
+  {
+    for(int i=0; i<banana.length; i++)
+    {
+      System.out.print(banana[i] + " ");
+    }
+    System.out.println();
   }
 
   /* The core idea of bubble sort is that we swap adjacent entries if they are
@@ -34,6 +49,23 @@ public class SortsExample
         }
       }
       cap--;
+    }
+  }
+  
+  public static void slowBubbleSort(int[] list)
+  {
+    for(int step = 1; step <list.length; step++)
+    {
+      for(int i=1; i<list.length; i++)
+      {
+        // if entries are out of order, swap them
+        if(list[i-1] > list[i])
+        {
+          int temp = list[i]; // make sure we don't lose data
+          list[i] = list[i-1];
+          list[i-1] = temp;
+        }
+      }
     }
   }
   
@@ -107,10 +139,68 @@ public class SortsExample
   
   public static void bogoSort(int[] list)
   {
+ /* while(!isSorted(list))
+    {
+      randomizeList(list);
+    }*/
   }
   
   public static void mergeSort(int[] list)
   {
+    if( list.length < 2 )
+    {
+      return; // end method
+    }
+  
+    // Step 1: separate into two sublists
+    int size = list.length/2;
+    int[] first = new int[size];
+    int[] second = new int[list.length - size];
+    // fill first sublist
+    for(int i=0; i < size; i++)
+    {
+      first[i] = list[i];
+    }
+    // fill second sublist
+    for(int i = size; i < list.length; i++)
+    {
+      second[i-size] = list[i];
+    }
+   
+    // Step 2: sort the sublists (we'll come back to this later)
+    mergeSort(first);
+    mergeSort(second);
     
+    // Step 3: merge the sorted sublists
+    int i1 = 0; // where we are in the first list
+    int i2 = 0; // where we are in the second list
+    
+    // For each slot in the list:
+    for(int i=0; i<list.length; i++)
+    {
+      if(i1 >= first.length)
+      {
+        list[i] = second[i2];
+        i2++;
+      }
+      else if(i2 >= second.length)
+      {
+        list[i] = first[i1];
+        i1++;
+      }
+      else
+      {
+        if(first[i1] < second[i2])
+        {
+          list[i] = first[i1];
+          i1++;
+        }
+        else
+        {
+          list[i] = second[i2];
+          i2++;
+        }
+      }
+    }
   }
 }
