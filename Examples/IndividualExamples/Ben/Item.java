@@ -4,10 +4,12 @@
 public abstract class Item
 {
   // Constants that tell us what type of item this is
-  public static final int INVALID = 0;
-  public static final int CONSUMABLE = 1;
-  public static final int WEAPON = 2;
-  public static final int ARMOR = 3;
+  // (There are other ways to accomplish this, such as the instanceof keyword)
+  // (but we haven't covered that in class)
+  public static final int INVALID = 0;    // 0000
+  public static final int CONSUMABLE = 1; // 0001
+  public static final int WEAPON = 2;     // 0010
+  public static final int ARMOR = 4;      // 0100
 
   public String name;
   

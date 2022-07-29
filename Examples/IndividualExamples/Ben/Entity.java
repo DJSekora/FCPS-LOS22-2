@@ -47,6 +47,10 @@ public abstract class Entity
     {
       takeDamage(damage);
     }
+    else
+    {
+      damage = 0;
+    }
     return damage;
   }
   

@@ -11,8 +11,7 @@ public class Player extends Entity
   int wisdom;
   int charisma;
   
-  
-  
+  // Current equipment
   Weapon equippedWeapon;
   Armor equippedArmor;
   
@@ -43,7 +42,7 @@ public class Player extends Entity
   // (I assume you will want to do some dice rolls here if it's DnD)
   public int getAttack()
   {
-    int attack = strength;
+    int attack = strength/2;
     if(equippedWeapon != null)
     {
       attack += equippedWeapon.power;
@@ -54,7 +53,7 @@ public class Player extends Entity
   // Same as getAttack, but with defense and armor.
   public int getDefense()
   {
-    int defense = strength;
+    int defense = dexterity/3;
     if(equippedArmor != null)
     {
       defense += equippedArmor.defense;
@@ -72,36 +71,197 @@ public class Player extends Entity
     System.out.println(enemy.name + " attacked " + name + ". It dealt " + playerDamageTaken + " damage.");
   }
   
-  public void equipWeapon(Weapon weapon)
+  /* Equip the Weapon passed in here. Unequip and return the previously
+     equipped Weapon.
+   */
+  public Weapon equipWeapon(Weapon toEquip)
   {
-    equippedWeapon = weapon;
+    Weapon toReturn = equippedWeapon;
+    equippedWeapon = toEquip;
+    return toReturn;
   }
   
-  public void equipArmor(Armor armor)
+  public Armor equipArmor(Armor toEquip)
   {
-    equippedArmor = armor;
+    Armor toReturn = equippedArmor;
+    equippedArmor = toEquip;
+    return toReturn;
   }
   
   public void optionsMenu(Scanner scan)
   {
     System.out.println("What would you like to do?");
-    String option = scan.nextLine().toLowerCase();
-    if(option.startsWith("show bag"))
+    System.out.println("(Options: bag, use, equip, status, quit)");
+    
+    String option = scan.next().toLowerCase();
+    if(option.startsWith("bag"))
     {
       displayBag();
+      scan.nextLine();
     }
+    else if(option.startsWith("use"))
+    {
+      int index = promptForBagIndex(scan, "use", Item.CONSUMABLE);
+      
+      if(index > -1)
+      {
+        // inventory contains Item objects, so we need to tell it that this
+        // specific object is definitely a Consumable.
+        Consumable itemToUse = (Consumable)inventory.get(index);
+        
+        itemToUse.use(this); // this passes in the current player object
+        
+        System.out.println("Used 1 " + itemToUse.name);
+        
+        // Remove the item from the list if we used the last one
+        if(itemToUse.quantity <= 0)
+        {
+          inventory.remove(index);
+        }
+      }
+    }
+    else if(option.startsWith("equip"))
+    {
+      System.out.println("Would you like to equip (w)eapons or (a)rmor?");
+      option = scan.next();
+      if(option.startsWith("w"))
+      {
+        int index = promptForBagIndex(scan, "equip", Item.WEAPON);
+        if(index > -1)
+        {
+          Weapon previouslyEquipped = equipWeapon((Weapon)inventory.get(index));
+          if(previouslyEquipped != null)
+          {
+            inventory.set(index, previouslyEquipped);
+          }
+        }
+      }
+      else // if not weapons, must be armor currently
+      {
+        int index = promptForBagIndex(scan, "equip", Item.ARMOR);
+        if(index > -1)
+        {
+          Armor previouslyEquipped = equipArmor((Armor)inventory.get(index));
+          if(previouslyEquipped != null)
+          {
+            inventory.set(index, previouslyEquipped);
+          }
+        }
+      }
+    }
+    else if(option.startsWith("status"))
+    {
+      displayStatus();
+    }
+    else if(option.startsWith("quit"))
+    {
+      System.exit(0);
+    }
+    System.out.println();
+  }
+  
+  /* Helper method re-used when selecting consumables, weapons, and armor from
+     the inventory.
+   */
+  public int promptForBagIndex(Scanner scan, String verb, int itemType)
+  {
+    System.out.println("Items available to " + verb +":");
+    displayItemsOfType(itemType);
+    System.out.println("Enter the index of the item you would like to " + verb + ":");
+    int index = scan.nextInt();
+    scan.nextLine();
+    
+    if(index < 0 || index >= inventory.size())
+    {
+      System.out.println("Invalid bag slot selected.");
+    }
+    else if(!(inventory.get(index).type == itemType))
+    {
+      System.out.println("That item cannot be used.");
+    }
+    else // We get here if they entered a valid index
+    {
+      return index;
+    }
+    return -1;
   }
   
   public void displayBag()
   {
     for(int i=0; i<inventory.size(); i++)
     {
-      System.out.println(inventory.get(i));
+      System.out.println(i + ": " + inventory.get(i));
+    }
+  }
+  
+  /* Helper method used to display all items matching the entered type */
+  public void displayItemsOfType(int type)
+  {
+    for(int i=0; i<inventory.size(); i++)
+    {
+      if(inventory.get(i).type == type)
+      {
+        System.out.println(i + ": " + inventory.get(i));
+      }
     }
   }
   
   public void giveItem(Item item)
   {
     inventory.add(item);
+  }
+  
+  public void displayStatus()
+  {
+    System.out.println("Health: " + currentHealth + "/" + maxHealth);
+    System.out.println("Stats:");
+    System.out.println(" Strength:     " + strength);
+    System.out.println(" Dexterity:    " + dexterity);
+    System.out.println(" Constitution: " + constitution);
+    System.out.println(" Intelligence: " + intelligence);
+    System.out.println(" Wisdom:       " + wisdom);
+    System.out.println(" Charisma:     " + charisma);
+    System.out.println("Equipment:");
+    System.out.println(" Weapon: " + equippedWeapon);
+    System.out.println(" Armor:  " + equippedArmor);
+    System.out.println("Combat stats:");
+    System.out.println(" Attack:  " + getAttack());
+    System.out.println(" Defense: " + getDefense());
+  }
+  
+  public void enemyEncounter(Scanner scan, Enemy enemy, String location)
+  {
+    System.out.println("You encounter a " + enemy.name + " in " + location + "! Would you like to fight? (y/n)");
+    String response = scan.nextLine().toLowerCase();
+    
+    if(response.startsWith("y"))
+    {
+      while(isAlive() && enemy.isAlive())
+      {
+        fightEnemy(enemy);
+      }
+      if(!isAlive())
+      {
+        die();
+      }
+      else
+      {
+        defeatedEnemy(enemy);
+      }
+    }
+  }
+  
+  public void die()
+  {
+    System.out.println("You died!");
+  }
+  
+  public void defeatedEnemy(Enemy enemy)
+  {
+    System.out.println(enemy.name + " has been defeated!");
+    
+    // Do anything else you want to happen when you defeat an enemy like gaining loot, gaining xp points, etc. here
+    enemy.transferDropItems(inventory);
+    System.out.println();
   }
 }
