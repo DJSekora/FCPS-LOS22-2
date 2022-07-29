@@ -21,33 +21,32 @@
 
 import javax.swing.JPanel;
 import java.awt.Graphics;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener; 
 
 public class BetterKeyboardExample extends JPanel implements KeyListener
 {
-  int sx = 200;
-  int sy = 200;
-  int sw = 50;
-  int sh = 50;
-  
-  // The speed will now change depending on input and be applied in a main loop
-  int xSpeed = 0;
-  int ySpeed = 0;
+  Square ourSquare;
+  Square theirSquare;
   
   // How many pixels to move per frame max
   int maxSpeed = 5;
 
   public BetterKeyboardExample()
   {
+    ourSquare = new Square(50, 50, 100, new Color(7));
+    theirSquare = new Square(200, 50, 100, new Color(0xcf));
+  
     addKeyListener(this);
     setFocusable(true);
   }
   
   public void paintComponent(Graphics g)
   {
-    //super.paintComponent(g);
-    g.fillRect(sx, sy, sw, sh);
+    super.paintComponent(g);
+    ourSquare.drawTo(g);
+    theirSquare.drawTo(g);
   }
   
   /* Combine the timer idea and the keyboard input idea. This way, we move at
@@ -63,10 +62,9 @@ public class BetterKeyboardExample extends JPanel implements KeyListener
   public void mainLoop()
   {
     while(true)
-    {
-      sx+=xSpeed;
-      sy+=ySpeed;
-      
+    { 
+      ourSquare.move();
+    
       try
       {
         Thread.sleep(20);
@@ -86,19 +84,19 @@ public class BetterKeyboardExample extends JPanel implements KeyListener
     // mainLoop method. So, all we have to do here is set xSpeed and ySpeed.
     if(code == KeyEvent.VK_RIGHT)
     {
-      xSpeed = maxSpeed;
+      ourSquare.xSpeed = maxSpeed;
     }
     else if(code == KeyEvent.VK_LEFT)
     {
-      xSpeed = -maxSpeed;
+      ourSquare.xSpeed = -maxSpeed;
     }
     else if(code == KeyEvent.VK_UP)
     {
-      ySpeed = -maxSpeed;
+      ourSquare.ySpeed = -maxSpeed;
     }
     else if(code == KeyEvent.VK_DOWN)
     {
-      ySpeed = -maxSpeed;
+      ourSquare.ySpeed = maxSpeed;
     }
   }
   
@@ -110,14 +108,46 @@ public class BetterKeyboardExample extends JPanel implements KeyListener
     // Notice how we can combine the cases here
     if(code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_LEFT)
     {
-      xSpeed = 0;
+      ourSquare.xSpeed = 0;
     }
     else if(code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN)
     {
-      ySpeed = 0;
+      ourSquare.ySpeed = 0;
     }
   }
   public void keyTyped(KeyEvent e)
   {
+  }
+}
+
+class Square
+{
+  int x;
+  int y;
+  int size;
+  Color color;
+  
+  // The speed will now change depending on input and be applied in a main loop
+  int xSpeed = 0;
+  int ySpeed = 0;
+  
+  public Square(int nx, int ny, int nsize, Color ncolor)
+  {
+    x = nx;
+    y = ny;
+    size = nsize;
+    color = ncolor;
+  }
+  
+  public void drawTo(Graphics g)
+  {
+    g.setColor(color);
+    g.fillRect(x, y, size, size);
+  }
+  
+  public void move()
+  {
+    x+=xSpeed;
+    y+=ySpeed;
   }
 }
