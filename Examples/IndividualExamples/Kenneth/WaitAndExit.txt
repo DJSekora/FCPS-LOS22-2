@@ -1,0 +1,2 @@
+// This line waits for 2000ms then exits the program
+new Thread(new Runnable(){public void run(){try{Thread.sleep(2000);}catch(Exception e){} System.exit(0);}}).start();
