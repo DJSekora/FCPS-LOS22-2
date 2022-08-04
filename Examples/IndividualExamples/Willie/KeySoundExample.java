@@ -1,29 +1,45 @@
+/* Imports for audio */
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.SourceDataLine;
 
+/* Imports for window */
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import java.awt.Graphics;
+
+/* Imports for keyboard input */
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener; 
 
 public class KeySoundExample extends JPanel implements KeyListener
 {
+  // PI*2 is a very useful 
   static final double PI2 = 2*Math.PI;
+  
+  // Interval between consecutive notes in the chromatic scale. Multiply a
+  // frequency by this value to go up one half-step.
   static final double INTERVAL = Math.pow(2, 1.0/12);
   
+  // Currently playing frequency. For now, only one tone allowed at a time.
   double prevFreq = 440;
   double freq = 440;
+  
+  // How much to increase the angle by each time to maintain the desired frequency.
+  // (
   double inc = freq*PI2/44100;
   
-  boolean[] pressed;
+  // array keeping track of which keys are pressed, may be useful if you want to implement pressing multiple keys at once
+  // (but for now this is maintained but not used)
+  boolean[] pressed; 
+  
+  // Array holding the frequencies for each key press
   double[] frequencies;
   boolean go = true;
   
   SourceDataLine sdl;
   
+  // Standard main method stolen from MainForGraphics
   public static void main(String[] args)
   {
     JFrame frame = new JFrame();
@@ -38,11 +54,15 @@ public class KeySoundExample extends JPanel implements KeyListener
   
   public KeySoundExample()
   {
+    // These two must be here for keyboard input
     addKeyListener(this);
     setFocusable(true);
     
     pressed = new boolean[13];
     
+    
+    // Populate the frequencies for one full octave
+    // (slot 0 is reserved for "silence")
     frequencies = new double[13];
     frequencies[10] = 440;
     for(int i=10; i > 1; i--)
@@ -60,34 +80,46 @@ public class KeySoundExample extends JPanel implements KeyListener
     super.paintComponent(g);
   }
   
+  // We always play a sound
   public void mainLoop()
   {
-        try
+    try
+    {
+      // sin operates on angles
+      double angle = 0;
+      
+      // volume can range from 0 to 100
+      double volume = 100;
+      
+      // this passes in information into the SourceDataLine
+      byte[] buf = new byte[ 1 ];
+      double sample;
+    
+      // define audio format as 44100 samples per second, 8 bits per sample (1 byte), 1 channel
+      AudioFormat af = new AudioFormat( (float)44100, 8, 1, true, false );
+      sdl = AudioSystem.getSourceDataLine( af );
+      sdl.open(af, 2205); // 2205 is the buffer size in samples. This means 1/20 of a second latency
+      sdl.start();
+      while(go)
+      {
+        for(int i=0; i<1; i++)
         {
-          double angle = 0;
-          double volume = 100;
-          byte[] buf = new byte[ 1 ];
-          double sample;
-        
-          AudioFormat af = new AudioFormat( (float)44100, 8, 1, true, false );
-          sdl = AudioSystem.getSourceDataLine( af );
-          sdl.open();
-          sdl.start();
-          while(go)
-          {
-            for(int i=0; i<100; i++)
-            {
-              sample = getSinSample(angle);
-              buf[0] = (byte)(sample * volume);
-              sdl.write( buf, 0, 1 );
-              angle += inc;
-              angle = angle % PI2;
-            }
-          }
-          sdl.drain();
-          sdl.stop();
+          sample = getSinSample(angle);
+          buf[0] = (byte)(sample * volume);
+          sdl.write( buf, 0, 1 ); // putting data into the sourcedataline is what makes the sound
+          angle += inc;
+          angle = angle % PI2;
         }
-        catch(Exception e){e.printStackTrace();}
+      }
+      // end stream
+      sdl.drain();
+      sdl.stop();
+      sdl.close();
+    }
+    catch(Exception e)
+    {
+      e.printStackTrace();
+    }
   }
 
   public void keyPressed(KeyEvent e)
@@ -102,7 +134,7 @@ public class KeySoundExample extends JPanel implements KeyListener
     
       if(freq != prevFreq)
       {
-        sdl.flush();
+        //sdl.flush();
         prevFreq = freq;
       }
     }
